@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <SPIFFS.h>
-#include <TFT_eSPI.h>
+#include <Adafruit_SH110X.h>
 #define WIFI_TIMEOUT_MS 20000
 #define WIFI_RECOVER_TIME_MS 30000
 
@@ -22,12 +22,12 @@ private:
     String savedpasswd[5] = {"", "", "", "", ""};
     bool flag = false;
     struct wifidet wifidetails;
-    TFT_eSPI *display;
+    Adafruit_SH1106G *display;
     int returnSavedNetworks();
     void updateSavedNetworks(char *ssid, char *pass);
 
 public:
-    WifiService(TFT_eSPI *disp);
+    WifiService(Adafruit_SH1106G *disp);
     // void static keepwifialive(WiFiEvent_t event, WiFiEventInfo_t info);
     void wifiscan();
     boolean connectwifi(const char *ssid, const char *pass);

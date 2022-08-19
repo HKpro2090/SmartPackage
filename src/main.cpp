@@ -1,47 +1,72 @@
 #include <Arduino.h>
-#include <Wire.h>
-#include <TFT_eSPI.h>
 #include <SPIFFS.h>
 #include <ESPmDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SH110X.h>
 #include <CoreFunc/WifiService.h>
 #include <CoreFunc/Timeservice.h>
+#include <CoreFunc/Keypadservice.h>
+#include <CoreFunc/Apphandler.h>
+#include <CoreFunc/IDstruct.h>
+
 Timeservice tms(19800, 0);
 Timeservice *tmsp = &tms;
-TFT_eSPI tft = TFT_eSPI();
-TFT_eSPI *display = &tft;
+#define i2c_Address 0x3c
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1
+Adafruit_SH1106G oled = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+Adafruit_SH1106G *display = &oled;
 WifiService wifiserv = WifiService(display);
+Keypadservice keys = Keypadservice();
+Keypadservice *keypad = &keys;
+IDstruct id = {"Harikrishnan Vamsi", "Analyst", "harikrishnanv", "1234567890","BC12"};
+IDstruct *idcard = &id;
+Apphandler aph(tmsp,display,keypad,&aph,idcard);
+
+void apphandlerimptask(void *para)
+{
+  for (;;)
+  {
+    aph.appflagchecker();
+    vTaskDelay(1);
+  }
+}
 
 void setup() {
-  
-  // Start Display
-  display->init();
-  display->setRotation(1);
-  display->fillScreen(TFT_BLACK);
-  // display->setCursor(55,113);
-  display->setCursor(0, 0);
-  display->setTextColor(TFT_WHITE, TFT_BLACK);
+  //Wire.begin(14,15);
+  Wire.begin(21,22);
+  delay(250);
+  display->begin(i2c_Address, true);
+  display->clearDisplay();
+  display->display();
+  display->setCursor(0,0);
   display->setTextSize(1);
+  display->setTextColor(SH110X_WHITE,SH110X_BLACK);
   display->println(F("Loading..."));
+  display->display();
   Serial.begin(9600);
   display->println(F("Serial Debugger Established"));
-  // display->drawNumber(ESP.getPsramSize(),0,50);
-  // display->drawNumber(ESP.getFreePsram(), 0, 100);
+  display->display();
   display->println(F("Mounting FileSystem ...."));
+  display->display();
   if (!SPIFFS.begin(true))
   {
     display->println(F("An Error has occurred while mounting SPIFFS"));
   }
+
   else
   {
     display->println(F("Filesystem Mounted"));
   }
+  display->display();
   delay(1000);
-  //Wifi Service Established
+  // Wifi Service Established
   wifiserv.bootwifi();
-  // tms.configtimezone();
-  // tms.timeupdate();
+  Serial.println(WiFi.macAddress());
   ArduinoOTA
       .onStart([]()
                {
@@ -50,25 +75,68 @@ void setup() {
         type = "sketch";
       else // U_SPIFFS
         type = "filesystem";
-
       // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+      display->setTextSize(1);
       Serial.println("Start updating " + type); })
       .onEnd([]()
              { Serial.println("\nEnd"); })
       .onProgress([](unsigned int progress, unsigned int total)
-                  { Serial.printf("Progress: %u%%\r", (progress / (total / 100))); })
+                  { 
+    display->setCursor(0,0);
+    display->println(F("New Firmware Update"));
+    display->drawLine(0,11,128,11,SH110X_WHITE);
+    display->setCursor(0, 30);
+    display->printf("Updating ... : %u%%\r", (progress / (total / 100)));
+    display->display();
+    display->clearDisplay();
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100))); })
       .onError([](ota_error_t error)
                {
-      Serial.printf("Error[%u]: ", error);
-      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-      else if (error == OTA_END_ERROR) Serial.println("End Failed"); });
-
+    display->setCursor(0,0);
+    display->println(F("OTA Update Failed"));
+    display->setCursor(0, 30);
+    display->clearDisplay();
+    display->printf("Error[%u]: ", error);
+    Serial.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR)
+    {
+      display->setCursor(0, 40);
+      display->println(F("Reason: Auth Failed"));
+      Serial.println(F("Auth Failed"));
+    }
+    else if (error == OTA_BEGIN_ERROR)
+    {
+      display->setCursor(0, 40);
+      display->println(F("Reason: Begin Failed"));
+      Serial.println(F("Begin Failed"));
+    }
+    else if (error == OTA_CONNECT_ERROR)
+    {
+      display->setCursor(0, 40);
+      display->println(F("Reason:Connect Failed"));
+      Serial.println(F("Connect Failed"));
+    }
+    else if (error == OTA_RECEIVE_ERROR)
+    {
+      display->setCursor(0, 40);
+      display->println(F("Reason: Receive Failed"));
+      Serial.println(F("Receive Failed"));
+    }
+    else if (error == OTA_END_ERROR)
+    {
+      display->setCursor(0, 40);
+      display->println(F("Reason: End Failed"));
+      Serial.println(F("End Failed"));
+    }
+    });
   ArduinoOTA.begin();
+  display->clearDisplay();
+  display->display();
+  xTaskCreate(apphandlerimptask, "Apphandler", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+  aph.startapp("Homeapp");
 }
 
 void loop() {
+  keypad->buttonservice();
   ArduinoOTA.handle();
 }

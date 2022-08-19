@@ -1,6 +1,6 @@
 #include "./CoreFunc/WifiService.h"
 
-WifiService::WifiService(TFT_eSPI *disp)
+WifiService::WifiService(Adafruit_SH1106G *disp)
 {
     display = disp;
     WiFi.mode(WIFI_STA);
@@ -13,6 +13,7 @@ int WifiService::returnSavedNetworks()
     File file = SPIFFS.open("/wifi.txt");
     if (!file)
         Serial.println(F("No saved networks available."));
+        
     else
     {
         String a = file.readString();
@@ -63,8 +64,15 @@ void WifiService::updateSavedNetworks(char *ssid, char *pass)
 void WifiService::bootwifi()
 {
     display->println(F("[WIFI] Reteriving Saved Networks"));
+    display->display();
+    display->clearDisplay();
+    display->display();
+    display->setCursor(0, 0);
+    display->setTextSize(1);
+    display->setTextColor(SH110X_WHITE);
     int k = returnSavedNetworks();
     display->println(F("[WIFI] Scanning for Saved Networks"));
+    display->display();
     int n = WiFi.scanNetworks();
     for (int i = 0; i <= k; i++)
     {
@@ -85,10 +93,12 @@ boolean WifiService::connectwifi(const char *ssid, const char *pass)
         if (WiFi.status() == WL_CONNECTED)
         {
             display->println(F("Already Connected"));
+            display->display();
             return true;
         }
         // Serial.println(F("[WIFI] Connecting"));
         display->println(F("[WIFI] Connecting"));
+        display->display();
         // Serial.println(ssid);
         // Serial.println(pass);
         WiFi.begin(ssid, pass);
@@ -101,6 +111,7 @@ boolean WifiService::connectwifi(const char *ssid, const char *pass)
         {
             // Serial.println(F("[WIFI] FAILED"));
             display->println(F("WIFI Failed"));
+            display->display();
             vTaskDelay(WIFI_RECOVER_TIME_MS / portTICK_PERIOD_MS);
             break;
         }
@@ -108,8 +119,10 @@ boolean WifiService::connectwifi(const char *ssid, const char *pass)
         {
             // Serial.println(F("[WIFI] Connected"));
             display->println(F("[WIFI] Connected"));
+            display->display();
             // Serial.println(WiFi.localIP());
-            display->println(WiFi.localIP());
+            display->println(WiFi.localIP()
+            );
             wifidetails.wifiSSID.clear();
             wifidetails.wifiSSID.concat(ssid);
             wifidetails.ipaddr.clear();
