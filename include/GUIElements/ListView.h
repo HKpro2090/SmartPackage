@@ -28,6 +28,7 @@ private:
     Button btarr[4];
 
 public:
+    String selectedbtname = "";
     ListView(Keypadservice *t, Adafruit_SH1106G *d, LinkedList<String> *hlist, int x, int y, int w, int h,bool butorlist);
     ListView(Keypadservice *t, Adafruit_SH1106G *d, LinkedList<String> *hlist, LinkedList<String> *slist, int x, int y, int w, int h, bool butorlist);
     ListView(Keypadservice *t, Adafruit_SH1106G *d, LinkedList<Button> *hbtlist, int x, int y, int w, int h);

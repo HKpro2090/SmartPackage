@@ -99,6 +99,7 @@ int ListView::lvbtupdatetask()
     }
     if(input->shortpressA)
     {
+        selectedbtname = btarr[selectedbt].buttontext;
         Serial.println("App open");
         return 2;
     }

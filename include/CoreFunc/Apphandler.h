@@ -30,7 +30,7 @@ private:
 public:
     Apphandler *aph;
     bool otherapprunning;
-    Apphandler(Timeservice *tmsp, Adafruit_SH1106G *oled, Keypadservice *ks, Apphandler *selfaph,IDstruct *id);
+    Apphandler(Timeservice *tmsp, Adafruit_SH1106G *oled, Keypadservice *ks, Apphandler *selfaph,RFIDservice *rfid,IDstruct *id);
     void appstackhandler();
     void updateservicepointer();
     void push(TaskHandle_t s);

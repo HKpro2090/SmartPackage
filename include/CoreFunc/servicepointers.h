@@ -6,6 +6,7 @@
 #include <CoreFunc/Timeservice.h>
 #include <CoreFunc/WifiService.h>
 #include <Adafruit_SH110X.h>
+#include <CoreFunc/RFIDservice.h>
 #include <SD.h>
 
 struct servicepointers
@@ -13,6 +14,7 @@ struct servicepointers
     Timeservice *tmsp;
     Adafruit_SH1106G *display;
     // RotaryInput *rotationinput;
+    RFIDservice *rfid;
     Keypadservice *keypadinput;
 };
 

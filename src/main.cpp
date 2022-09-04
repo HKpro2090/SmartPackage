@@ -11,7 +11,7 @@
 #include <CoreFunc/Keypadservice.h>
 #include <CoreFunc/Apphandler.h>
 #include <CoreFunc/IDstruct.h>
-
+#include <CoreFunc/RFIDservice.h>
 Timeservice tms(19800, 0);
 Timeservice *tmsp = &tms;
 #define i2c_Address 0x3c
@@ -25,7 +25,9 @@ Keypadservice keys = Keypadservice();
 Keypadservice *keypad = &keys;
 IDstruct id = {"Harikrishnan Vamsi", "Analyst", "harikrishnanv", "1234567890","BC12"};
 IDstruct *idcard = &id;
-Apphandler aph(tmsp,display,keypad,&aph,idcard);
+RFIDservice r;
+RFIDservice *rfid = &r;
+Apphandler aph(tmsp,display,keypad,&aph,rfid,idcard);
 
 void apphandlerimptask(void *para)
 {

@@ -5,6 +5,7 @@ App::App(servicepointers s, String apname, StartAppStruct *n, bool *stopappflag,
     appservices.display = s.display;
     appservices.tmsp = s.tmsp;
     appservices.keypadinput = s.keypadinput;
+    appservices.rfid = s.rfid;
     idcard = id;
     // appservices.rotationinput = s.rotationinput;
     newappstruct = n;

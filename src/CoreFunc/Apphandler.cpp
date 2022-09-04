@@ -30,7 +30,7 @@ void scheduleapptask(void *para)
     }
 }
 
-Apphandler::Apphandler(Timeservice *tmsp, Adafruit_SH1106G *oled, Keypadservice *ks, Apphandler *selfaph,IDstruct *id)
+Apphandler::Apphandler(Timeservice *tmsp, Adafruit_SH1106G *oled, Keypadservice *ks, Apphandler *selfaph, RFIDservice *rfid, IDstruct *id)
 {
     Laucherapptask = NULL;
     otherapprunning = false;
@@ -38,6 +38,7 @@ Apphandler::Apphandler(Timeservice *tmsp, Adafruit_SH1106G *oled, Keypadservice 
     services.tmsp = tmsp;
     // services.rotationinput = rip;
     services.keypadinput = ks;
+    services.rfid = rfid;
     idcard = id;
     aph = selfaph;
     startappstruct.startapp = false;
@@ -62,10 +63,14 @@ void Apphandler::startapp(char *s)
         xTaskCreate(homeapptask, s, 6000, hap, 1, &Laucherapptask);
         push(Laucherapptask);
     }
-    if (strcmp(s, "Scheduleapp") == 0)
+    else if (strcmp(s, "Schedule Watcher") == 0)
     {
         xTaskCreate(scheduleapptask, s, 6000, hap, 1, &Laucherapptask);
         push(Laucherapptask);
+    }
+    else
+    {
+        vTaskResume(top->apptaskhandler);
     }
 }
 

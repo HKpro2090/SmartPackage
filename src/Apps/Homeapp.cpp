@@ -130,9 +130,11 @@ void Homeapp::menuscreen()
             }
             if(change == 2)
             {
+                appscreencounter=-1;
+                screenpagecounter = 0;
+                x = 0;
+                newappstruct->startingappname = lv->selectedbtname.c_str();
                 menubts->~LinkedList();
-                // *stopapp = true;
-                newappstruct->startingappname = "Scheduleapp";
                 newappstruct->startapp = true;
             }
         }
